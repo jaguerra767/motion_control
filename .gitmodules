@@ -1,0 +1,9 @@
+[submodule "ClearCore-library"]
+	path = ClearCore-library
+	url = git@github.com:Teknic-Inc/ClearCore-library.git
+[submodule "CMSIS"]
+	path = CMSIS
+	url = git@github.com:ARM-software/CMSIS.git
+[submodule "Atmel"]
+	path = Atmel
+	url = git@github.com:jaguerra767/Atmel.git
