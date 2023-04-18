@@ -154,9 +154,7 @@ set(LWIP_SOURCES
 add_library(ClearCore STATIC ${CLEAR_CORE_SOURCES})
 add_library(LwIP STATIC ${LWIP_SOURCES})
 
-target_compile_options(ClearCore PRIVATE
-        )
 
-add_executable(motion_control main.cpp)
+add_executable(motion_control main.cpp device_startup/startup_SAME53.c)
 target_link_libraries(motion_control ClearCore)
 target_link_libraries(motion_control LwIP)
