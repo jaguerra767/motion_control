@@ -188,17 +188,22 @@ target_include_directories(LwIP PUBLIC
 
 
 
-
+include_directories(include)
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/device_startup/flash_with_bootloader.ld)
-add_executable(${PROJECT_NAME}.elf main.cpp device_startup/startup_SAME53.c)
+
+set(NANOPB_SRC nanopb/pb_common.c nanopb/pb_decode.c nanopb/pb_encode.c)
+set(NANOPB_DEVICE_SRC src/error.pb.c src/motor.pb.c src/sensor.pb.c src/wrapper.pb.c)
+add_executable(${PROJECT_NAME}.elf src/main.cpp device_startup/startup_SAME53.c ${NANOPB_SRC} ${NANOPB_DEVICE_SRC})
 
 target_include_directories(${PROJECT_NAME}.elf PRIVATE
         CMSIS/CMSIS/Include
         Atmel/SAME53_DFP/1.1.118/include
         ClearCore-library/libClearCore/inc
         ClearCore-library/LwIP/LwIP/src/include
-        ClearCore-library/LwIP/LwIP/port/include)
+        ClearCore-library/LwIP/LwIP/port/include
+        nanopb
+        include)
 
 #target_link_libraries(${PROJECT_NAME}.elf ClearCore LwIP)
 

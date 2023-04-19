@@ -7,3 +7,6 @@
 [submodule "Atmel"]
 	path = Atmel
 	url = git@github.com:jaguerra767/Atmel.git
+[submodule "nanopb"]
+	path = nanopb
+	url = git@github.com:nanopb/nanopb.git

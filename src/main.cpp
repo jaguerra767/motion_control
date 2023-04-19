@@ -1,4 +1,5 @@
 #include "ClearCore.h"
+#include <pb.h>
 
 [[noreturn]]
 int main() {
