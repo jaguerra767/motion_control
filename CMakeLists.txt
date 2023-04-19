@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24)
 project(motion_control C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
-add_definitions(-D__SAME53N19N__)
+add_definitions(-D__SAME53N19A__)
 add_definitions(-DARM_MATH_CM4)
 
 
@@ -60,6 +60,7 @@ set(CLEAR_CORE_SOURCES
         ClearCore-library/libClearCore/usb/class/cdc/device/cdcdf_acm.c
         ClearCore-library/libClearCore/usb/device/usbdc.c
         ClearCore-library/libClearCore/usb/usb_protocol.c
+        Atmel/SAME53_DFP/1.1.118/gcc/system_same53.c
         )
 
 
@@ -154,7 +155,61 @@ set(LWIP_SOURCES
 add_library(ClearCore STATIC ${CLEAR_CORE_SOURCES})
 add_library(LwIP STATIC ${LWIP_SOURCES})
 
+target_include_directories(ClearCore PUBLIC
+        Atmel/SAME53_DFP/1.1.118/include
+        CMSIS/CMSIS/Include
+        ClearCore-library/libClearCore/inc
+        ClearCore-library/LwIP/LwIP/port/include
+        ClearCore-library/LwIP/LwIP/src/include
+        ClearCore-library/libClearCore/usb
+        ClearCore-library/libClearCore/usb/device
+        ClearCore-library/libClearCore/usb/class/cdc
+        ClearCore-library/libClearCore/usb/class/cdc/device
+        ClearCore-library/libClearCore/hal/include
+        ClearCore-library/libClearCore/hal/utils/include
+        ClearCore-library/libClearCore/hri
+        ClearCore-library/libClearCore/hpl/core
+        ClearCore-library/libClearCore/hpl/port
+        ClearCore-library/libClearCore/hpl/usb
+        ClearCore-library/libClearCore/config
+        ClearCore-library/libClearCore/hpl/gclk
+        ClearCore-library/libClearCore/hpl/mclk
+        )
 
-add_executable(motion_control main.cpp device_startup/startup_SAME53.c)
-target_link_libraries(motion_control ClearCore)
-target_link_libraries(motion_control LwIP)
+
+target_include_directories(LwIP PUBLIC
+        Atmel/SAME53_DFP/1.1.118/include
+        CMSIS/CMSIS/Include
+        ClearCore-library/LwIP/LwIP/port/include
+        ClearCore-library/LwIP/LwIP/src/include
+        ClearCore-library/libClearCore/inc
+        )
+
+
+
+set(LINKER_SCRIPT device_startup/flash_with_bootloader.ld)
+add_executable(${CMAKE_PROJECT_NAME}.elf main.cpp device_startup/startup_SAME53.c ${LINKER_SCRIPT})
+
+target_include_directories(${CMAKE_PROJECT_NAME}.elf PRIVATE
+        CMSIS/CMSIS/Include
+        Atmel/SAME53_DFP/1.1.118/include
+        ClearCore-library/libClearCore/inc
+        ClearCore-library/LwIP/LwIP/src/include
+        ClearCore-library/LwIP/LwIP/port/include)
+target_link_libraries(${CMAKE_PROJECT_NAME}.elf ClearCore)
+target_link_libraries(${CMAKE_PROJECT_NAME}.elf LwIP)
+
+
+set(LINK_LIBS -Wl,--start-group -lm -larm_cortexM4lf_math -lClearCore -lLwIP  -Wl,--end-group)
+set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T${LINKER_SCRIPT})
+
+set(HEX_FILE ${PROJECT_SOURCE_DIR}/build/${CMAKE_PROJECT_NAME}.hex)
+set(BIN_FILE ${PROJECT_SOURCE_DIR}/build/${CMAKE_PROJECT_NAME}.bin)
+add_custom_command(TARGET ${CMAKE_PROJECT_NAME}.elf POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -Oihex $ ${HEX_FILE}
+        COMMAND ${CMAKE_OBJCOPY} -Obinary $ ${BIN_FILE}
+        COMMENT "Building ${HEX_FILE} \nBuilding ${BIN_FILE}"
+        )
+
+
+

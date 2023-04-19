@@ -15,9 +15,11 @@ set(OBJCOPY arm-none-eabi-objcopy)
 set(OBJDUMP arm-none-eabi-objdump)
 set(SIZE arm-none-eabi-size)
 
-set(MCU_FLAGS -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16)
+set(MCU_FLAGS "-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16")
 #Compiler flags
-set(COMMON_FLAGS -Wall -c --param max-inline-insns-single=50 -v -O3 -ffunction-sections -fdata-sections -g2 -Wall -Wextra -pedantic)
+set(COMMON_FLAGS "-Wall -c --param max-inline-insns-single=50 -v -O3 -ffunction-sections -fdata-sections -g2 -Wall -Wextra -pedantic")
 
-set(CMAKE_C_FLAGS ${MCU_FLAGS} ${COMMON_FLAGS} -x c -std=gnu11)
-set(CMAKE_CXX_FLAGS ${MCU_FLAGS} ${COMMON_FLAGS} -fno-rtti -fno-exceptions -std=gnu++17 -fno-threadsafe-statics -nostdlib -Wno-register)
+set(CMAKE_C_FLAGS "${MCU_FLAGS} ${COMMON_FLAGS} -x c -std=gnu11")
+set(CMAKE_CXX_FLAGS "${MCU_FLAGS} ${COMMON_FLAGS} -fno-rtti -fno-exceptions -std=gnu++17 -fno-threadsafe-statics -nostdlib -Wno-register")
+
+set(CMAKE_EXE_LINKER_FLAGS "${MCU_FLAGS} --specs=rdimon.specs -Wl,--gc-sections")
