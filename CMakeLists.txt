@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_definitions(-D__SAME53N19A__)
 add_definitions(-DARM_MATH_CM4)
 
+message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
 
 set(CLEAR_CORE_SOURCES
         ClearCore-library/libClearCore/hal/src/hal_atomic.c
@@ -187,27 +188,35 @@ target_include_directories(LwIP PUBLIC
 
 
 
-set(LINKER_SCRIPT device_startup/flash_with_bootloader.ld)
-add_executable(${CMAKE_PROJECT_NAME}.elf main.cpp device_startup/startup_SAME53.c ${LINKER_SCRIPT})
 
-target_include_directories(${CMAKE_PROJECT_NAME}.elf PRIVATE
+
+set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/device_startup/flash_with_bootloader.ld)
+add_executable(${PROJECT_NAME}.elf main.cpp device_startup/startup_SAME53.c)
+
+target_include_directories(${PROJECT_NAME}.elf PRIVATE
         CMSIS/CMSIS/Include
         Atmel/SAME53_DFP/1.1.118/include
         ClearCore-library/libClearCore/inc
         ClearCore-library/LwIP/LwIP/src/include
         ClearCore-library/LwIP/LwIP/port/include)
-target_link_libraries(${CMAKE_PROJECT_NAME}.elf ClearCore)
-target_link_libraries(${CMAKE_PROJECT_NAME}.elf LwIP)
+
+#target_link_libraries(${PROJECT_NAME}.elf ClearCore LwIP)
+
+target_link_directories(${PROJECT_NAME}.elf PUBLIC
+        ${CMAKE_SOURCE_DIR}/CMSIS/CMSIS/Lib/GCC
+        ${CMAKE_SOURCE_DIR}/build
+#        ${CMAKE_SOURCE_DIR}/device_startup
+        )
 
 
-set(LINK_LIBS -Wl,--start-group -lm -larm_cortexM4lf_math -lClearCore -lLwIP  -Wl,--end-group)
-set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T${LINKER_SCRIPT})
+set(LINK_LIBS "-Wl,--start-group -lm -larm_cortexM4lf_math -lClearCore -lLwIP  -Wl,--end-group")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINK_LIBS} -Wl,-Map=${PROJECT_NAME}.map -T${LINKER_SCRIPT}")
 
-set(HEX_FILE ${PROJECT_SOURCE_DIR}/build/${CMAKE_PROJECT_NAME}.hex)
-set(BIN_FILE ${PROJECT_SOURCE_DIR}/build/${CMAKE_PROJECT_NAME}.bin)
-add_custom_command(TARGET ${CMAKE_PROJECT_NAME}.elf POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -Oihex $ ${HEX_FILE}
-        COMMAND ${CMAKE_OBJCOPY} -Obinary $ ${BIN_FILE}
+set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
+set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)
+add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
+        COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
         COMMENT "Building ${HEX_FILE} \nBuilding ${BIN_FILE}"
         )
 
