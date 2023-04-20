@@ -1,5 +1,17 @@
-#include "ClearCore.h"
 #include <pb.h>
+#include <pb_encode.h>
+#include <pb_decode.h>
+#include <sensor.pb.h>
+#include <motor.pb.h>
+#include <wrapper.pb.h>
+#include <cstdint>
+#include "ClearCore.h"
+
+//Viam defines
+constexpr int V_OK = 0;
+constexpr int V_ERR = 1;
+constexpr int V_SENT = 2;
+constexpr int V_RCV = 3;
 
 
 
