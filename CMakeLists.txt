@@ -64,8 +64,6 @@ set(CLEAR_CORE_SOURCES
         Atmel/SAME53_DFP/1.1.118/gcc/system_same53.c
         )
 
-
-
 set(LWIP_SOURCES
         ClearCore-library/LwIP/LwIP/port/include/ethernetif.c
         ClearCore-library/LwIP/LwIP/src/api/api_lib.c
@@ -187,9 +185,6 @@ target_include_directories(LwIP PUBLIC
         )
 
 
-
-include_directories(include)
-
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/device_startup/flash_with_bootloader.ld)
 
 set(NANOPB_SRC nanopb/pb_common.c nanopb/pb_decode.c nanopb/pb_encode.c)
@@ -205,14 +200,14 @@ target_include_directories(${PROJECT_NAME}.elf PRIVATE
         nanopb
         include)
 
-#target_link_libraries(${PROJECT_NAME}.elf ClearCore LwIP)
+
 
 target_link_directories(${PROJECT_NAME}.elf PUBLIC
         ${CMAKE_SOURCE_DIR}/CMSIS/CMSIS/Lib/GCC
         ${CMAKE_SOURCE_DIR}/build
-#        ${CMAKE_SOURCE_DIR}/device_startup
         )
 
+target_link_libraries(${PROJECT_NAME}.elf ClearCore LwIP)
 
 set(LINK_LIBS "-Wl,--start-group -lm -larm_cortexM4lf_math -lClearCore -lLwIP  -Wl,--end-group")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINK_LIBS} -Wl,-Map=${PROJECT_NAME}.map -T${LINKER_SCRIPT}")

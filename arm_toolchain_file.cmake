@@ -17,7 +17,7 @@ set(SIZE arm-none-eabi-size)
 
 set(MCU_FLAGS "-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16")
 #Compiler flags
-set(COMMON_FLAGS "-Wall --param max-inline-insns-single=50 -O3 -ffunction-sections -fdata-sections -g2 -Wall -Wextra -pedantic")
+set(COMMON_FLAGS "-Wall --param max-inline-insns-single=50 -O3 -ffunction-sections -fdata-sections -g2 -Wall")
 
 set(CMAKE_C_FLAGS "${MCU_FLAGS} ${COMMON_FLAGS} -x c -std=gnu11")
 set(CMAKE_CXX_FLAGS "${MCU_FLAGS} ${COMMON_FLAGS} -fno-rtti -fno-exceptions -std=gnu++17 -fno-threadsafe-statics -Wno-register")

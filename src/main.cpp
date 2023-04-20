@@ -1,7 +1,8 @@
 #include "ClearCore.h"
 #include <pb.h>
 
-[[noreturn]]
+
+
 int main() {
     bool led_state = true;
     while(true){
@@ -10,3 +11,4 @@ int main() {
         Delay_ms(1000);
     }
 }
+
