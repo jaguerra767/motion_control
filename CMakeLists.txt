@@ -6,6 +6,8 @@ add_definitions(-D__SAME53N19A__)
 add_definitions(-DARM_MATH_CM4)
 
 message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
+set(GIT_DIR_LOOKUP_POLICY ALLOW_LOOKING_ABOVE_CMAKE_SOURCE_DIR)
+add_subdirectory(etl)
 
 set(CLEAR_CORE_SOURCES
         ClearCore-library/libClearCore/hal/src/hal_atomic.c
@@ -198,7 +200,8 @@ target_include_directories(${PROJECT_NAME}.elf PRIVATE
         ClearCore-library/LwIP/LwIP/src/include
         ClearCore-library/LwIP/LwIP/port/include
         nanopb
-        include)
+        include
+        ${CMAKE_SOURCE_DIR})
 
 
 
@@ -207,7 +210,7 @@ target_link_directories(${PROJECT_NAME}.elf PUBLIC
         ${CMAKE_SOURCE_DIR}/build
         )
 
-target_link_libraries(${PROJECT_NAME}.elf ClearCore LwIP)
+target_link_libraries(${PROJECT_NAME}.elf ClearCore LwIP etl::etl)
 
 set(LINK_LIBS "-Wl,--start-group -lm -larm_cortexM4lf_math -lClearCore -lLwIP  -Wl,--end-group")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINK_LIBS} -Wl,-Map=${PROJECT_NAME}.map -T${LINKER_SCRIPT}")
