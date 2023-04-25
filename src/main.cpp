@@ -1,9 +1,5 @@
-#include <pb.h>
-#include <pb_encode.h>
-#include <pb_decode.h>
-#include <sensor.pb.h>
-#include <motor.pb.h>
-#include <wrapper.pb.h>
+
+
 #include <cstdint>
 #include "ClearCore.h"
 
