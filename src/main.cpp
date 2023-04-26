@@ -1,21 +1,15 @@
 
 
-#include <cstdint>
+
 #include "ClearCore.h"
-
-//Viam defines
-constexpr int V_OK = 0;
-constexpr int V_ERR = 1;
-constexpr int V_SENT = 2;
-constexpr int V_RCV = 3;
+#include "serial_viam.hpp"
 
 
 
-int main() {
-    bool led_state = true;
-    while(true){
-        ConnectorLed.State(led_state);
-        led_state = !led_state;
+[[noreturn]] int main() {
+    while (true) {
+        viam::setup();
+        viam::cycle();
         Delay_ms(1000);
     }
 }

@@ -7,7 +7,8 @@
 
 
 namespace viam {
-
+    void setup();
+    void cycle();
 }
 
 
