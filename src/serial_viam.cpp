@@ -46,9 +46,9 @@ auto cycle(){
     SensorRequest sensor_request;
     MotorRequest motor_request;
     auto client_buffer = serial_read();
-    std::array<std::uint8_t ,buffer_size> return_message{};
+    std::uint8_t return_message[buffer_size];
     auto request_stream = pb_istream_from_buffer(client_buffer.data(), client_buffer.size());
-    auto response_stream = pb_ostream_from_buffer(return_message.data(), return_message.size());
+    auto response_stream = pb_ostream_from_buffer(return_message, sizeof(return_message));
     if(!pb_decode(&request_stream, WrappedRequest_fields, &request)){
         //TODO: Handle Error
     }
@@ -108,6 +108,6 @@ auto cycle(){
         //TODO: Error Handling
     }
 
-    //ConnectorUsb.Send(static_cast<char>(*return_message.data()),response_stream.bytes_written);
+    ConnectorUsb.Send(reinterpret_cast<const char *>(return_message), sizeof(return_message));
 
 }
