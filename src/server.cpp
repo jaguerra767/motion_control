@@ -7,7 +7,6 @@
 #include "config.h"
 #include <optional>
 #include <variant>
-#include <etl/vector.h>
 
 
 using namespace server;
@@ -18,62 +17,60 @@ namespace {
     bool use_dhcp = false; //TODO: This should be able to be configured via serial at commissioning (and on the fly?)
 }
 
-struct disconnected_t{};
-
-struct setup_t{};
-
-struct connected_t{
-    explicit connected_t(EthernetTcpServer&& server):_server(server){}
-    void cycle();
-private:
-    void update_clients();
-    void send_message(const char* message);
-    etl::vector<unsigned char*, max_clients> receive_messages();
-    EthernetTcpServer _server;
-    etl::vector<EthernetTcpClient, max_clients> _clients;
+struct disconnected_t {
 };
-void connected_t::cycle(){
+
+struct setup_t {
+};
+
+struct connected_t {
+    explicit connected_t(EthernetTcpServer &&server) : _server(server) {}
+    auto cycle() -> void;
+
+private:
+    auto update_clients() -> void;
+    auto send_message(const char *message) -> void;
+    auto receive_messages() -> std::array<unsigned char *, max_clients>;
+    EthernetTcpServer _server;
+    std::array<EthernetTcpClient, max_clients> _clients{};
+};
+
+auto connected_t::cycle() -> void {
     update_clients();
     EthernetMgr.Refresh();
 }
 
-void connected_t::update_clients(){
+auto connected_t::update_clients() -> void {
     auto new_client = _server.Accept();
-    if(new_client.Connected()){
-        if(!_clients.full()){
-            _clients.push_back(new_client);
-        }else{
-            for(auto& client:_clients){
-                if(!client.Connected()){
-                    client = new_client;
-                    break;
-                }
+    if (new_client.Connected()) {
+        for (auto &client: _clients) {
+            if (!client.Connected()) {
+                client = new_client;
+                break;
             }
         }
         new_client.Close();
     }
 }
 
-etl::vector<unsigned char*, max_clients> connected_t::receive_messages() {
-    etl::vector<unsigned char*, max_clients> recv_msg_buffer;
-    for(auto& client:_clients){
-        if(client.Connected()){
-            unsigned char* packet_received;
-            //TODO: Copied this from example but it makes no sense that you would keep looping.
-            while(client.BytesAvailable()){
-                client.Read(packet_received, max_packet_length);
+auto connected_t::receive_messages() -> std::array<unsigned char *, max_clients> {
+    std::array<unsigned char *, max_clients> recv_msg_buffer{};
+    for (auto i = 0u; i < _clients.size() - 1; i++) {
+        if (_clients[i].Connected()) {
+            unsigned char *packet_received;
+            while (_clients[i].BytesAvailable()) {
+                _clients[i].Read(packet_received, max_packet_length);
             }
-            recv_msg_buffer.push_back(packet_received);
+            std::memcpy(recv_msg_buffer[i], packet_received, max_packet_length);
         }
     }
     return recv_msg_buffer;
 }
 
-void connected_t::send_message(const char* message) {
-    for(auto& client:_clients){
-        if(client.Connected()){
-            //This is from the examples, we should not be using the send message method to close connections
-            if(client.Send(message)==0){
+auto connected_t::send_message(const char *message) -> void {
+    for (auto &client: _clients) {
+        if (client.Connected()) {
+            if (client.Send(message) == 0) {
                 client.Close();
                 client = EthernetTcpClient();
             }
@@ -82,23 +79,26 @@ void connected_t::send_message(const char* message) {
 }
 
 
-struct interrupted_t{};
+struct interrupted_t {
+};
 
 using state_t = std::variant<disconnected_t, setup_t, connected_t, interrupted_t>;
-
+//Mom, can we have pattern matching?
+//We have pattern matching at home.
+//Pattern matching at home:
 struct visit_connection {
-    state_t operator()(const disconnected_t&){
-        if(EthernetMgr.PhyLinkActive()){
+    auto operator()(const disconnected_t &) -> state_t {
+        if (EthernetMgr.PhyLinkActive()) {
             return setup_t();
         }
     }
-    state_t operator()(const setup_t&){
+    auto operator()(const setup_t &) -> state_t {
         EthernetMgr.Setup();
-        if(use_dhcp){
-            if(!EthernetMgr.DhcpBegin()){
+        if (use_dhcp) {
+            if (!EthernetMgr.DhcpBegin()) {
                 return disconnected_t();
             }
-        }else{
+        } else {
             EthernetMgr.LocalIp(config::default_ip_addr);
             auto server = EthernetTcpServer(port_number);
             server.Begin();
@@ -106,30 +106,32 @@ struct visit_connection {
         }
         return disconnected_t();
     }
-    state_t operator()(connected_t& connection){
-        if(EthernetMgr.PhyLinkActive()){
+    auto operator()(connected_t &connection) -> state_t {
+        if (EthernetMgr.PhyLinkActive()) {
             connection.cycle();
             return connection;
-        }else{
+        } else {
             return interrupted_t();
         }
     }
-    state_t operator()(const interrupted_t&){
+    auto operator()(const interrupted_t &) -> state_t {
         return disconnected_t();
     }
 };
 
-void dhcp_enable(){
+auto dhcp_enable() -> void {
     use_dhcp = true;
 }
-void dhcp_disable(){
+
+auto dhcp_disable() -> void {
     use_dhcp = false;
 }
+
 namespace {
     state_t connection_state = disconnected_t();
 }
 
-void run(){
+auto run() -> void {
     std::visit(visit_connection(), connection_state);
 }
 

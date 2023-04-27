@@ -6,8 +6,6 @@ add_definitions(-D__SAME53N19A__)
 add_definitions(-DARM_MATH_CM4)
 
 message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
-set(GIT_DIR_LOOKUP_POLICY ALLOW_LOOKING_ABOVE_CMAKE_SOURCE_DIR)
-add_subdirectory(etl)
 
 set(CLEAR_CORE_SOURCES
         ClearCore-library/libClearCore/hal/src/hal_atomic.c
@@ -191,8 +189,12 @@ set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/device_startup/flash_with_bootloader.ld)
 
 set(NANOPB_SRC nanopb/pb_common.c nanopb/pb_decode.c nanopb/pb_encode.c)
 set(NANOPB_DEVICE_SRC src/error.pb.c src/motor.pb.c src/sensor.pb.c src/wrapper.pb.c)
-add_executable(${PROJECT_NAME}.elf src/main.cpp device_startup/startup_SAME53.c ${NANOPB_SRC} ${NANOPB_DEVICE_SRC}
-             config.h src/serial_viam.cpp src/serial_viam.hpp)
+add_executable(${PROJECT_NAME}.elf
+        src/main.cpp src/server.cpp
+        device_startup/startup_SAME53.c
+        ${NANOPB_SRC}
+        ${NANOPB_DEVICE_SRC}
+        src/serial_viam.cpp)
 
 target_include_directories(${PROJECT_NAME}.elf PRIVATE
         CMSIS/CMSIS/Include
@@ -211,7 +213,7 @@ target_link_directories(${PROJECT_NAME}.elf PUBLIC
         ${CMAKE_SOURCE_DIR}/build
         )
 
-target_link_libraries(${PROJECT_NAME}.elf ClearCore LwIP etl::etl)
+target_link_libraries(${PROJECT_NAME}.elf ClearCore LwIP)
 
 set(LINK_LIBS "-Wl,--start-group -lm -larm_cortexM4lf_math -lClearCore -lLwIP  -Wl,--end-group")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINK_LIBS} -Wl,-Map=${PROJECT_NAME}.map -T${LINKER_SCRIPT}")
