@@ -82,10 +82,10 @@ namespace viam{
                     case Action_GoTo:
                         ConnectorLed.State(true);
                         break;
-                    case Action_resetZeroPosition:
+                    case Action_ResetZeroPosition:
                         ConnectorLed.State(false);
                         break;
-                    case Action_getPosition:
+                    case Action_GetPosition:
                         ConnectorLed.State(true);
                         break;
                     case Action_Stop:

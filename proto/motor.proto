@@ -6,8 +6,8 @@ enum Action
   SetPower = 1;
   GoFor = 2;
   GoTo = 3;
-  resetZeroPosition = 4;
-  getPosition = 5;
+  ResetZeroPosition = 4;
+  GetPosition = 5;
   Stop = 6;
   IsPowered = 7;
   IsMoving = 8;

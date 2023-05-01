@@ -4,7 +4,7 @@ import sys
 from viam.components.sensor.sensor import Sensor
 from viam.components.motor.motor import Motor
 from viam.module.module import Module
-#from sensors import TimerOne, TimerTwo
+# from sensors import TimerOne, TimerTwo
 from motor import StmMotor
 
 

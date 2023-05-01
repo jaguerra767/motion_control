@@ -7,10 +7,18 @@
 
 
 [[noreturn]] int main() {
+    viam::setup();
     while (true) {
-        viam::setup();
         viam::cycle();
         Delay_ms(1000);
     }
 }
+
+
+
+
+
+
+
+
 

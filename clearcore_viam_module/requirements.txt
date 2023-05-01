@@ -1,0 +1,12 @@
+googleapis-common-protos==1.59.0
+grpcio==1.54.0
+grpcio-tools==1.54.0
+grpclib==0.4.3
+h2==4.1.0
+hpack==4.0.0
+hyperframe==6.0.1
+multidict==6.0.4
+Pillow==9.5.0
+protobuf==4.22.3
+typing_extensions==4.5.0
+viam-sdk==0.2.18
