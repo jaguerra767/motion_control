@@ -32,6 +32,7 @@ class StmMotor(Motor, Reconfigurable):
         motor.tty = "/dev/tty.usbmodem142101"
         return motor
 
+
     def send_msg(self, req):
         wrapped_response = WrappedResponse()
         with serial.Serial(port=self.tty, baudrate=115200, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE) as ser:
