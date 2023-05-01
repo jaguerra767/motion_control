@@ -8,7 +8,7 @@ from viam.module.types import Reconfigurable
 from viam.proto.app.robot import ComponentConfig
 from viam.proto.common import ResourceName
 from viam.resource.base import ResourceBase
-from viam.resource.registry import ResourceRegistration, Registry
+from viam.resource.registry import ResourceRegistration, Registry, ResourceCreatorRegistration
 from viam.resource.types import Model, ModelFamily
 
 from motor_pb2 import MotorRequest, MotorResponse, Action
@@ -29,7 +29,7 @@ class StmMotor(Motor, Reconfigurable):
             dependencies: Mapping[ResourceName, ResourceBase]
     ) -> Self:
         motor = cls(config.name)
-        motor.tty = config.attributes.fields['tty'].string_value
+        motor.tty = "/dev/tty.usbmodem142101"
         return motor
 
     def send_msg(self, req):
@@ -54,6 +54,7 @@ class StmMotor(Motor, Reconfigurable):
             # failure
             pass
 
+
     async def go_for(self, rpm: float, revolutions: float, *, extra: Optional[Dict[str, Any]] = None, timeout: Optional[float] = None, **kwargs):
         print(f'go_for -> {rpm}, {revolutions}')
 
@@ -75,7 +76,7 @@ class StmMotor(Motor, Reconfigurable):
         return wrapped_response.motorResponse.val_f
 
     async def get_properties(self, *, extra: Optional[Dict[str, Any]] = None, timeout: Optional[float] = None, **kwargs) -> Motor.Properties:
-        return Motor.Properties(False)
+        return Motor.Properties(True)
 
     async def stop(self, *, extra: Optional[Dict[str, Any]] = None, timeout: Optional[float] = None, **kwargs):
         await self.set_power(0.0)
@@ -117,5 +118,5 @@ class StmMotor(Motor, Reconfigurable):
 Registry.register_resource_creator(
     Motor.SUBTYPE,
     StmMotor.MODEL,
-    StmMotor.new
+    ResourceCreatorRegistration(StmMotor.new)
 )
