@@ -8,9 +8,12 @@
 
 [[noreturn]] int main() {
     viam::setup();
+    bool led_state = true;
     while (true) {
         viam::cycle();
-        Delay_ms(1000);
+        ConnectorLed.State(led_state);
+        led_state = !led_state;
+        Delay_ms(100);
     }
 }
 

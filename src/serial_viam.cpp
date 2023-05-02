@@ -16,26 +16,34 @@
 
 namespace {
     constexpr int baud_rate = 115200;
-    constexpr std::uint8_t buffer_size = 60;
+    constexpr size_t buffer_size = 60;
     //std::array<const MotorDriver*,4> motors = {&ConnectorM0,&ConnectorM1,&ConnectorM2,&ConnectorM3};
+    const Connector* output_LEDs[6] = {
+            &ConnectorIO0, &ConnectorIO1, &ConnectorIO2, &ConnectorIO3, &ConnectorIO4, &ConnectorIO5
+    };
+    std::uint8_t input[buffer_size+1];
 }
 
 namespace viam{
-    void setup(){
+    auto setup() -> void {
         ConnectorUsb.Mode(Connector::USB_CDC);
         ConnectorUsb.Speed(baud_rate);
         ConnectorUsb.PortOpen();
     }
 
-    auto serial_read() -> std::array<std::uint8_t, buffer_size>{
-        std::array<std::uint8_t, buffer_size> buffer{};
-        for(auto& i:buffer){
-            if(ConnectorUsb.CharPeek()==-1){
-                break;
-            }
-            i = static_cast<std::uint8_t >(ConnectorUsb.CharGet()); //TODO: This was taken from examples but casts a 16 bit int into a char, fix
+    auto reset_buffer() -> void {
+        for(auto& i : input){
+            i = (char)NULL;
         }
-        return buffer;
+    }
+
+    auto serial_read() -> void {
+        auto i = 0u;
+        while(i < buffer_size && ConnectorUsb.CharPeek() != -1) {
+            input[i] = (std::uint8_t)ConnectorUsb.CharGet();
+            i++;
+            Delay_ms(1);
+        }
     }
 
     void cycle(){
@@ -43,9 +51,9 @@ namespace viam{
         WrappedResponse response = WrappedResponse_init_zero;
         SensorRequest sensor_request;
         MotorRequest motor_request;
-        auto client_buffer = serial_read();
+        serial_read();
         std::uint8_t return_message[buffer_size];
-        auto request_stream = pb_istream_from_buffer(client_buffer.data(), client_buffer.size());
+        auto request_stream = pb_istream_from_buffer(input, buffer_size);
         auto response_stream = pb_ostream_from_buffer(return_message, sizeof(return_message));
         if(!pb_decode(&request_stream, WrappedRequest_fields, &request)){
             //TODO: Handle Error
