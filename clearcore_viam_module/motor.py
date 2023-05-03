@@ -29,20 +29,20 @@ class StmMotor(Motor, Reconfigurable):
             dependencies: Mapping[ResourceName, ResourceBase]
     ) -> Self:
         motor = cls(config.name)
-        motor.tty = "/dev/tty.usbmodem142101"
+        motor.tty = "/dev/tty.usbmodem1424201"
         return motor
 
     def send_msg(self, req):
         wrapped_response = WrappedResponse()
-        with serial.Serial(port=self.tty, baudrate=115200, parity=serial.PARITY_NONE,
-                           stopbits=serial.STOPBITS_ONE) as ser:
-            x = ser.write(req.ByteSize().to_bytes(1, 'little'))
-            ser.flush()
+        with serial.Serial(port=self.tty, baudrate=115200) as ser:
+            #x = ser.write(req.ByteSize().to_bytes(1, 'little'))
+            #ser.flush()
             y = ser.write(req.SerializeToString())
+            print(f"SENT MESSAGE: {req.SerializeToString()}")
             ser.flush()
-            sz = ser.read(1)
-            sz = int.from_bytes(sz, 'little')
-            from_stm = ser.read(sz)
+            #sz = ser.read(1)
+            #sz = int.from_bytes(sz, 'little')
+            from_stm = ser.read(60)
             wrapped_response = wrapped_response.FromString(from_stm)
         return wrapped_response
 
