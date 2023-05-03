@@ -13,6 +13,7 @@
 #include <wrapper.pb.h>
 #include <cstdint>
 #include <array>
+#include <optional>
 
 
 namespace {
@@ -40,6 +41,9 @@ namespace viam{
     {
         std::array<std::uint8_t, buffer_size> input{};
         for(auto& i:input){
+            if(ConnectorUsb.CharPeek() == -1){
+                break;
+            }
             i = static_cast<std::uint8_t>(ConnectorUsb.CharGet());
         }
         return input;
@@ -109,6 +113,25 @@ namespace viam{
                         ConnectorLed.State(false);
                         //TODO: Error handling
                 }
+                    default:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        ConnectorLed.State(false);
         }
         if(!pb_encode(&response_stream, WrappedResponse_fields, &response)){
             //TODO: Error Handling
