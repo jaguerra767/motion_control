@@ -12,6 +12,7 @@
 #include <motor.pb.h>
 #include <wrapper.pb.h>
 #include <cstdint>
+#include <array>
 
 
 namespace {
@@ -21,7 +22,7 @@ namespace {
     const Connector* output_LEDs[6] = {
             &ConnectorIO0, &ConnectorIO1, &ConnectorIO2, &ConnectorIO3, &ConnectorIO4, &ConnectorIO5
     };
-    std::uint8_t input[buffer_size+1];
+    // std::uint8_t input[buffer_size+1];
 }
 
 namespace viam{
@@ -29,31 +30,30 @@ namespace viam{
         ConnectorUsb.Mode(Connector::USB_CDC);
         ConnectorUsb.Speed(baud_rate);
         ConnectorUsb.PortOpen();
-    }
-
-    auto reset_buffer() -> void {
-        for(auto& i : input){
-            i = (char)NULL;
-        }
-    }
-
-    auto serial_read() -> void {
-        auto i = 0u;
-        while(i < buffer_size && ConnectorUsb.CharPeek() != -1) {
-            input[i] = (std::uint8_t)ConnectorUsb.CharGet();
-            i++;
+        while(!ConnectorUsb){
             Delay_ms(1);
         }
     }
+
+
+    auto read_buffer() -> std::array<std::uint8_t, buffer_size>
+    {
+        std::array<std::uint8_t, buffer_size> input{};
+        for(auto& i:input){
+            i = static_cast<std::uint8_t>(ConnectorUsb.CharGet());
+        }
+        return input;
+    }
+
 
     void cycle(){
         WrappedRequest request = WrappedRequest_init_zero;
         WrappedResponse response = WrappedResponse_init_zero;
         SensorRequest sensor_request;
         MotorRequest motor_request;
-        serial_read();
         std::uint8_t return_message[buffer_size];
-        auto request_stream = pb_istream_from_buffer(input, buffer_size);
+        auto input = read_buffer();
+        auto request_stream = pb_istream_from_buffer(input.data(), input.size());
         auto response_stream = pb_ostream_from_buffer(return_message, sizeof(return_message));
         if(!pb_decode(&request_stream, WrappedRequest_fields, &request)){
             //TODO: Handle Error
