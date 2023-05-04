@@ -28,9 +28,30 @@ namespace {
     bool is_moving = false;
     float current_power = 0.0;
     float current_position = 0.0;
+    bool gotSizePacket = true;
+
+    //copy from shawn's repo
+    std::array<std::uint8_t, buffer_size> clientMsg{};
+    std::array<std::uint8_t ,buffer_size> retMsg{};
+    std::uint8_t clientMsgSz = 0;
 }
 
 namespace viam{
+    auto read(std::array<std::uint8_t, buffer_size> &in_buffer){
+        auto i = 0u;
+        while(i < buffer_size && (ConnectorUsb.CharPeek() != -1)){
+            in_buffer[i] = static_cast<std::uint8_t>(ConnectorUsb.CharGet());
+            i++;
+        }
+    }
+    auto alt_cycle() -> void {
+        if(gotSizePacket){
+            gotSizePacket = false;
+            std::uint8_t szRecv = clientMsgSz;
+
+        }
+
+    }
     auto setup() -> void {
         ConnectorUsb.Mode(Connector::USB_CDC);
         ConnectorUsb.Speed(baud_rate);

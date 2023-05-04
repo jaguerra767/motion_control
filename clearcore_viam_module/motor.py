@@ -35,14 +35,13 @@ class StmMotor(Motor, Reconfigurable):
     def send_msg(self, req):
         wrapped_response = WrappedResponse()
         with serial.Serial(port=self.tty, baudrate=115200) as ser:
-            #x = ser.write(req.ByteSize().to_bytes(1, 'little'))
-            #ser.flush()
-            y = ser.write(req.SerializeToString())
-            print(f"SENT MESSAGE: {req.SerializeToString()}")
+            x = ser.write(req.ByteSize().to_bytes(1, 'little'))
             ser.flush()
-            #sz = ser.read(1)
-            #sz = int.from_bytes(sz, 'little')
-            from_stm = ser.read(60)
+            y = ser.write(req.SerializeToString())
+            ser.flush()
+            sz = ser.read(1)
+            sz = int.from_bytes(sz, 'little')
+            from_stm = ser.read(sz)
             wrapped_response = wrapped_response.FromString(from_stm)
         return wrapped_response
 
