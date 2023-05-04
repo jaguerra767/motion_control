@@ -44,8 +44,7 @@ class TimerOne(Sensor, Reconfigurable):
         wrapped_request = WrappedRequest()
         wrapped_response = WrappedResponse()
         wrapped_request.sensorRequest.sensor = SensorType.Counter
-        with serial.Serial(port=self.tty, baudrate=115200, parity=serial.PARITY_NONE,
-                           stopbits=serial.STOPBITS_ONE) as ser:
+        with serial.Serial(port=self.tty, baudrate=115200) as ser:
             x = ser.write(wrapped_request.ByteSize().to_bytes(1, 'little'))
             ser.flush()
             y = ser.write(wrapped_request.SerializeToString())

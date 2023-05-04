@@ -16,27 +16,22 @@ from wrapper_pb2 import WrappedRequest, WrappedResponse
 
 
 class StmMotor(Motor, Reconfigurable):
-    MODEL: ClassVar[Model] = Model(
-        ModelFamily('demo', 'motor'),
-        'stm_motor'
-    )
+    MODEL: ClassVar[Model] = Model(ModelFamily('demo', 'motor'), 'stm_motor')
     tty: str
+    id: int
 
     @classmethod
-    def new(
-            cls,
-            config: ComponentConfig,
-            dependencies: Mapping[ResourceName, ResourceBase]
-    ) -> Self:
+    def new(cls, config: ComponentConfig, dependencies: Mapping[ResourceName, ResourceBase]) -> Self:
         motor = cls(config.name)
         motor.tty = "/dev/tty.usbmodem1424201"
+
         return motor
 
     def send_msg(self, req):
         wrapped_response = WrappedResponse()
         with serial.Serial(port=self.tty, baudrate=115200) as ser:
-            x = ser.write(req.ByteSize().to_bytes(1, 'little'))
-            ser.flush()
+            # x = ser.write(req.ByteSize().to_bytes(1, 'little'))
+            # ser.flush()
             y = ser.write(req.SerializeToString())
             ser.flush()
             sz = ser.read(1)

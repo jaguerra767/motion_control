@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 project(motion_control C CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 add_definitions(-D__SAME53N19A__)
 add_definitions(-DARM_MATH_CM4)
 

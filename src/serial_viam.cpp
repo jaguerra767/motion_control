@@ -28,48 +28,31 @@ namespace {
     bool is_moving = false;
     float current_power = 0.0;
     float current_position = 0.0;
-    bool gotSizePacket = true;
+    std::size_t clientMsgSz = 0;
 
-    //copy from shawn's repo
-    std::array<std::uint8_t, buffer_size> clientMsg{};
-    std::array<std::uint8_t ,buffer_size> retMsg{};
-    std::uint8_t clientMsgSz = 0;
 }
 
 namespace viam{
-    auto read(std::array<std::uint8_t, buffer_size> &in_buffer){
-        auto i = 0u;
-        while(i < buffer_size && (ConnectorUsb.CharPeek() != -1)){
-            in_buffer[i] = static_cast<std::uint8_t>(ConnectorUsb.CharGet());
-            i++;
-        }
-    }
-    auto alt_cycle() -> void {
-        if(gotSizePacket){
-            gotSizePacket = false;
-            std::uint8_t szRecv = clientMsgSz;
 
-        }
-
-    }
     auto setup() -> void {
         ConnectorUsb.Mode(Connector::USB_CDC);
         ConnectorUsb.Speed(baud_rate);
         ConnectorUsb.PortOpen();
     }
 
-
     auto read_buffer() -> std::optional<std::array<std::uint8_t, buffer_size>>
     {
         if(ConnectorUsb.CharPeek() == -1){
             return {};
         }
+        clientMsgSz = 0;
         std::array<std::uint8_t, buffer_size> input{};
         for(auto& i:input){
             if(ConnectorUsb.CharPeek() == -1){
                 break;
             }
             i = static_cast<std::uint8_t>(ConnectorUsb.CharGet());
+            clientMsgSz++;
         }
         return input;
     }
@@ -88,11 +71,11 @@ namespace viam{
         std::uint8_t return_message[buffer_size];
         auto input = read_buffer();
         if(input.has_value()){
-            auto request_stream = pb_istream_from_buffer(input.value().data(), input.value().size());
+            auto request_stream = pb_istream_from_buffer(input.value().data(), clientMsgSz);
             auto status = pb_decode(&request_stream, WrappedRequest_fields, &request);
-            auto response_stream = pb_ostream_from_buffer(return_message, sizeof(return_message));
+            auto response_stream = pb_ostream_from_buffer(return_message, buffer_size);
             if(!status){
-                Error_Handler(0);
+                Error_Handler(1);
             }
             switch (request.which_msg){
                 case WrappedRequest_sensorRequest_tag:
@@ -156,6 +139,7 @@ namespace viam{
                             response.msg.motorResponse.val_b = is_powered;
                             response.msg.motorResponse.val_f = current_power;
                             response.status = true;
+                            output_LEDs[0]->State(true);
                             break;
                         case Action_IsMoving:
                             response.msg.motorResponse.has_val_b = true;
@@ -170,6 +154,8 @@ namespace viam{
                 //TODO: Error Handling
                 Error_Handler(4);
             }
+            char bytes_written = static_cast<char>(response_stream.bytes_written);
+            ConnectorUsb.Send(bytes_written);
             ConnectorUsb.Send(reinterpret_cast<const char *>(return_message), response_stream.bytes_written);
         }
     }

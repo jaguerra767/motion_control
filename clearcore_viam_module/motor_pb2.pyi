@@ -11,8 +11,8 @@ IsPowered: Action
 NoAction: Action
 SetPower: Action
 Stop: Action
-getPosition: Action
-resetZeroPosition: Action
+GetPosition: Action
+ResetZeroPosition: Action
 
 class MotorRequest(_message.Message):
     __slots__ = ["action", "offset", "power", "revolutions", "rpm"]
