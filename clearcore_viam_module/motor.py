@@ -18,7 +18,6 @@ from wrapper_pb2 import WrappedRequest, WrappedResponse
 class StmMotor(Motor, Reconfigurable):
     MODEL: ClassVar[Model] = Model(ModelFamily('demo', 'motor'), 'stm_motor')
     tty: str
-    id: int
 
     @classmethod
     def new(cls, config: ComponentConfig, dependencies: Mapping[ResourceName, ResourceBase]) -> Self:
@@ -120,6 +119,7 @@ class StmMotor(Motor, Reconfigurable):
             dependencies: Mapping[ResourceName, ResourceBase]
     ):
         self.tty = config.attributes.fields['tty'].string_value
+
 
 
 Registry.register_resource_creator(
